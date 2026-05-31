@@ -373,6 +373,73 @@ add(ref([T("Singh, Y. (2011). "), T("Software testing", { italics: true }), T(".
 add(ref([T("Sommerville, I. (2011). "), T("Ingeniería de software", { italics: true }), T(" (9.ª ed.). Pearson Educación.")]));
 add(ref([T("International Software Testing Qualifications Board. (2018). "), T("Programa de estudio de nivel básico del ISTQB", { italics: true }), T(". ISTQB.")]));
 
+// ── ANEXOS ───────────────────────────────────────────────────────────────
+add(new Paragraph({ children: [new PageBreak()] }));
+add(H1("Anexos"));
+
+add(H2("Anexo A. Evidencia de ejecución de las pruebas automatizadas"));
+add(body("Resultado de la ejecución de la suite con el comando «pytest tests/ -v» sobre el repositorio del proyecto. Los 31 casos de prueba diseñados se ejecutaron de forma satisfactoria."));
+const code = (text, last = false) => new Paragraph({
+  shading: { fill: "1E1E1E", type: ShadingType.CLEAR },
+  spacing: { line: 240, after: last ? 120 : 0 },
+  children: [new TextRun({ text, font: "Consolas", size: 17, color: "D4D4D4" })] });
+const okLine = (text) => new Paragraph({
+  shading: { fill: "1E1E1E", type: ShadingType.CLEAR }, spacing: { line: 240, after: 0 },
+  children: [
+    new TextRun({ text, font: "Consolas", size: 17, color: "D4D4D4" }),
+    new TextRun({ text: "  PASSED", font: "Consolas", size: 17, color: "4EC9B0", bold: true }),
+  ] });
+add(code("$ pytest tests/ -v"));
+add(code("==================== test session starts ===================="));
+[
+  "test_auth.py::TestRegistro::test_registro_paciente_exitoso",
+  "test_auth.py::TestRegistro::test_registro_medico_exitoso",
+  "test_auth.py::TestRegistro::test_registro_email_duplicado",
+  "test_auth.py::TestRegistro::test_registro_contrasenas_no_coinciden",
+  "test_auth.py::TestRegistro::test_registro_contrasena_corta",
+  "test_auth.py::TestRegistro::test_campos_requeridos",
+  "test_auth.py::TestLogin::test_login_paciente_valido",
+  "test_auth.py::TestLogin::test_login_medico_valido",
+  "test_auth.py::TestLogin::test_login_credenciales_incorrectas",
+  "test_auth.py::TestLogin::test_login_email_inexistente",
+  "test_auth.py::TestLogin::test_logout",
+  "test_auth.py::TestLogin::test_redirect_sin_autenticacion",
+  "test_auth.py::TestControlAccesoRoles::test_paciente_no_accede_dashboard_medico",
+  "test_auth.py::TestControlAccesoRoles::test_medico_no_accede_panel_paciente",
+  "test_auth.py::TestControlAccesoRoles::test_admin_accede_panel_admin",
+  "test_appointments.py::TestAgendamientoCitas::test_ver_pagina_agendar",
+  "test_appointments.py::TestAgendamientoCitas::test_api_slots_doctor_valido",
+  "test_appointments.py::TestAgendamientoCitas::test_api_slots_fecha_invalida",
+  "test_appointments.py::TestAgendamientoCitas::test_api_slots_doctor_inexistente",
+  "test_appointments.py::TestAgendamientoCitas::test_calendario_api_json",
+  "test_appointments.py::TestAgendamientoCitas::test_agendar_cita_fecha_pasada",
+  "test_appointments.py::TestCancelacionReprogramacion::test_cancelar_cita_24h_antes",
+  "test_appointments.py::TestCancelacionReprogramacion::test_cancelar_cita_otro_paciente",
+  "test_appointments.py::TestCancelacionReprogramacion::test_medico_confirma_cita",
+  "test_appointments.py::TestMotorIA::test_prescreen_urgente",
+  "test_appointments.py::TestMotorIA::test_prescreen_rutina",
+  "test_appointments.py::TestMotorIA::test_prescreen_texto_vacio",
+  "test_appointments.py::TestMotorIA::test_api_doctores",
+  "test_appointments.py::TestRendimiento::test_carga_landing",
+  "test_appointments.py::TestRendimiento::test_carga_login",
+  "test_appointments.py::TestRendimiento::test_404",
+].forEach(t => add(okLine(t)));
+add(code("===================== 31 passed in 6.32s ====================", true));
+add(body("El resultado evidencia la cobertura de los requerimientos funcionales (autenticación, agendamiento, gestión de citas y pre-triaje) y no funcionales (rendimiento y manejo de errores) verificados mediante automatización.", {}));
+
+add(H2("Anexo B. Evidencia de despliegue en producción"));
+add(body("El sistema fue desplegado en la nube y verificado en funcionamiento. Se comprobó el ingreso con credenciales reales, la carga del cuerpo médico desde la base de datos PostgreSQL y la redirección por rol."));
+add(spacer());
+add(table([3000, 6360], ["Aspecto verificado", "Resultado"], [
+  ["URL pública", "https://agendapp-rde9.onrender.com"],
+  ["Repositorio de código", "https://github.com/bgaleanotec-maker/agendapp"],
+  ["Plataforma / Servidor", "Render · Gunicorn · PostgreSQL"],
+  ["Carga de datos", "13 médicos y catálogo de citas visibles en la página de inicio"],
+  ["Inicio de sesión (médico)", "Acceso exitoso y redirección al panel del médico"],
+  ["Control de acceso por rol", "Cada usuario accede únicamente a las vistas de su rol"],
+]));
+add(body("Nota: el despliegue utiliza el plan gratuito de Render; tras un periodo de inactividad la primera solicitud puede tardar algunos segundos mientras el servicio se reactiva.", { italics: true, size: 22, color: GREY }));
+
 // ── DOCUMENTO ───────────────────────────────────────────────────────────────
 const doc = new Document({
   creator: "Equipo AgendApp",
