@@ -1,0 +1,68 @@
+/* AgendApp — Estilos personalizados */
+:root {
+  --brand-primary: #0d6efd;
+  --brand-success: #198754;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #212529;
+}
+
+/* Navbar */
+.navbar-brand { font-size: 1.2rem; letter-spacing: -0.5px; }
+
+/* Cards */
+.card { transition: box-shadow .15s ease; }
+.card:hover { box-shadow: 0 .5rem 1.5rem rgba(0,0,0,.1)!important; }
+
+/* Sidebar-like nav highlight */
+.navbar .nav-link.active,
+.navbar .nav-link:focus { background: rgba(255,255,255,.15); border-radius: 6px; }
+
+/* FullCalendar overrides */
+.fc-toolbar-title { font-size: 1rem !important; font-weight: 700; }
+.fc-button { font-size: .8rem !important; }
+.fc-daygrid-event { border-radius: 4px !important; font-size: .78rem; }
+.fc-event-title { font-weight: 600; }
+
+/* Slot buttons */
+.slot-btn { min-width: 60px; font-size: .82rem; transition: all .1s; }
+.slot-btn.btn-primary { transform: scale(1.05); }
+
+/* AI banner */
+.border-start.border-4.border-primary { border-left-width: 4px!important; }
+
+/* Loading states */
+.skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* Table */
+.table th { font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; }
+.table td { font-size: .9rem; vertical-align: middle; }
+
+/* Footer */
+.footer { background: #fff; font-size: .85rem; }
+
+/* Responsive fixes */
+@media (max-width: 576px) {
+  .display-4 { font-size: 2rem; }
+  .fc-toolbar { flex-wrap: wrap; gap: .5rem; }
+  .fc-toolbar-title { font-size: .9rem !important; }
+}
+
+/* Badge pill */
+.badge { font-weight: 600; letter-spacing: .02em; }
+
+/* Form feedback */
+.form-control:focus, .form-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
+}
+
+/* Status color utilities */
+.status-pending   { border-left: 3px solid #ffc107; }
+.status-confirmed { border-left: 3px solid #198754; }
+.status-cancelled { border-left: 3px solid #dc3545; }
+.status-completed { border-left: 3px solid #6c757d; }

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Configurar Horarios{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <div>
+    <h4 class="fw-bold mb-0">Configurar Disponibilidad</h4>
+    <p class="text-muted small mb-0">Define tus horarios de atención semanales</p>
+  </div>
+</div>
+
+<form method="POST" id="scheduleForm">
+  <div class="row g-4">
+    <!-- Profile -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-person-badge text-primary me-2"></i>Perfil médico</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Especialidad</label>
+            <select name="specialty" class="form-select">
+              {% for s in ['Medicina General','Cardiología','Pediatría','Dermatología','Traumatología','Ginecología','Neurología','Psiquiatría','Oftalmología','Otorrinolaringología'] %}
+              <option {% if profile and profile.specialty == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Bio</label>
+            <textarea name="bio" class="form-control" rows="3" placeholder="Describe tu especialización…">{{ profile.bio or '' if profile }}</textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tarifa consulta (COP)</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" name="fee" class="form-control" min="0" step="1000"
+                     value="{{ profile.consultation_fee|int if profile else 0 }}"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0"><i class="bi bi-clock text-success me-2"></i>Horarios semanales</h6>
+          <button type="button" class="btn btn-sm btn-outline-success" onclick="addRow()">
+            <i class="bi bi-plus me-1"></i>Agregar día
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="scheduleRows">
+            {% if schedules %}
+              {% for s in schedules %}
+              <div class="row g-2 mb-3 schedule-row align-items-end">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Día</label>
+                  <select name="day" class="form-select form-select-sm">
+                    {% for d, n in [(0,'Lunes'),(1,'Martes'),(2,'Miércoles'),(3,'Jueves'),(4,'Viernes'),(5,'Sábado'),(6,'Domingo')] %}
+                    <option value="{{ d }}" {% if s.day_of_week == d %}selected{% endif %}>{{ n }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small fw-semibold">Inicio</label>
+                  <input type="time" name="start_time" class="form-control form-control-sm"
+                         value="{{ s.start_time.strftime('%H:%M') }}"/>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small fw-semibold">Fin</label>
+                  <input type="time" name="end_time" class="form-control form-control-sm"
+                         value="{{ s.end_time.strftime('%H:%M') }}"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Duración slot</label>
+                  <select name="slot_duration" class="form-select form-select-sm">
+                    {% for m in [15,20,30,45,60] %}
+                    <option value="{{ m }}" {% if s.slot_duration == m %}selected{% endif %}>{{ m }} min</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.schedule-row').remove()">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <!-- Default row -->
+              <div class="row g-2 mb-3 schedule-row align-items-end">
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Día</label>
+                  <select name="day" class="form-select form-select-sm">
+                    <option value="0">Lunes</option><option value="1">Martes</option>
+                    <option value="2">Miércoles</option><option value="3">Jueves</option>
+                    <option value="4">Viernes</option><option value="5">Sábado</option><option value="6">Domingo</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small fw-semibold">Inicio</label>
+                  <input type="time" name="start_time" class="form-control form-control-sm" value="08:00"/>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label small fw-semibold">Fin</label>
+                  <input type="time" name="end_time" class="form-control form-control-sm" value="17:00"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label small fw-semibold">Duración slot</label>
+                  <select name="slot_duration" class="form-select form-select-sm">
+                    <option value="15">15 min</option><option value="20">20 min</option>
+                    <option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.schedule-row').remove()">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-success mt-3 px-4">
+            <i class="bi bi-save me-2"></i>Guardar horarios
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function addRow() {
+  const tmpl = `<div class="row g-2 mb-3 schedule-row align-items-end">
+    <div class="col-md-3"><label class="form-label small fw-semibold">Día</label>
+      <select name="day" class="form-select form-select-sm">
+        <option value="0">Lunes</option><option value="1">Martes</option>
+        <option value="2">Miércoles</option><option value="3">Jueves</option>
+        <option value="4">Viernes</option><option value="5">Sábado</option><option value="6">Domingo</option>
+      </select></div>
+    <div class="col-md-2"><label class="form-label small fw-semibold">Inicio</label>
+      <input type="time" name="start_time" class="form-control form-control-sm" value="08:00"/></div>
+    <div class="col-md-2"><label class="form-label small fw-semibold">Fin</label>
+      <input type="time" name="end_time" class="form-control form-control-sm" value="17:00"/></div>
+    <div class="col-md-3"><label class="form-label small fw-semibold">Duración slot</label>
+      <select name="slot_duration" class="form-select form-select-sm">
+        <option value="15">15 min</option><option value="20">20 min</option>
+        <option value="30" selected>30 min</option><option value="45">45 min</option><option value="60">60 min</option>
+      </select></div>
+    <div class="col-md-2"><button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.schedule-row').remove()">
+      <i class="bi bi-trash"></i></button></div>
+  </div>`;
+  document.getElementById('scheduleRows').insertAdjacentHTML('beforeend', tmpl);
+}
+</script>
+{% endblock %}

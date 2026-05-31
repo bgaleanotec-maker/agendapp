@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Reportes{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Reportes</h4>
+    <p class="text-muted small mb-0">Estadísticas de tu consultorio</p>
+  </div>
+  <a href="{{ url_for('doctor_dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </a>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+  {% set total = all_appts|length %}
+  {% set completed = by_status.get('completed', 0) %}
+  {% set cancelled = by_status.get('cancelled', 0) %}
+  {% set pending   = by_status.get('pending', 0) %}
+  {% set confirmed = by_status.get('confirmed', 0) %}
+  {% set attend_rate = ((completed / total * 100)|round(1)) if total > 0 else 0 %}
+  {% set cancel_rate = ((cancelled / total * 100)|round(1)) if total > 0 else 0 %}
+
+  {% for val, label, color, icon in [
+    (total, 'Total citas', 'primary', 'calendar3'),
+    (completed, 'Completadas', 'success', 'check-circle'),
+    (cancelled, 'Canceladas', 'danger', 'x-circle'),
+    (str(attend_rate)+'%', 'Tasa asistencia', 'info', 'graph-up'),
+  ] %}
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-1 text-{{ color }} fw-bold">{{ val }}</div>
+      <div class="small text-muted"><i class="bi bi-{{ icon }} me-1"></i>{{ label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <!-- Chart: by status -->
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-pie-chart text-primary me-2"></i>Por estado</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart: monthly -->
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-bar-chart text-success me-2"></i>Citas por mes</h6>
+      </div>
+      <div class="card-body">
+        <canvas id="monthlyChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top patients -->
+  <div class="col-md-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-people text-warning me-2"></i>Pacientes frecuentes</h6>
+      </div>
+      <div class="card-body p-0">
+        {% if top_patients %}
+        <ul class="list-group list-group-flush">
+          {% for p in top_patients %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-person-circle me-2 text-muted"></i>{{ p.name }}</span>
+            <span class="badge bg-primary rounded-pill">{{ p.count }} citas</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center py-4 text-muted small">Sin datos aún.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent activity -->
+  <div class="col-md-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-clock-history text-secondary me-2"></i>Últimas citas</h6>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0 small">
+            <thead class="table-light">
+              <tr><th>Paciente</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+              {% for a in all_appts[-10:]|reverse %}
+              <tr>
+                <td>{{ a.patient.name }}</td>
+                <td>{{ a.date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ a.time.strftime('%H:%M') }}</td>
+                <td><span class="badge bg-{{ a.status_meta['color'] }}">{{ a.status_meta['label'] }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Pie chart
+new Chart(document.getElementById('statusChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Pendiente','Confirmada','Completada','Cancelada'],
+    datasets: [{
+      data: [
+        {{ by_status.get('pending',0) }},
+        {{ by_status.get('confirmed',0) }},
+        {{ by_status.get('completed',0) }},
+        {{ by_status.get('cancelled',0) }}
+      ],
+      backgroundColor: ['#ffc107','#198754','#6c757d','#dc3545'],
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+});
+
+// Bar chart monthly
+new Chart(document.getElementById('monthlyChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ monthly.keys()|list|tojson }},
+    datasets: [{
+      label: 'Citas',
+      data: {{ monthly.values()|list|tojson }},
+      backgroundColor: '#0d6efd88',
+      borderColor: '#0d6efd',
+      borderWidth: 1,
+    }]
+  },
+  options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+</script>
+{% endblock %}

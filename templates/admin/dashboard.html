@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h4 class="fw-bold mb-4"><i class="bi bi-gear text-primary me-2"></i>Panel Administrador</h4>
+<div class="row g-3 mb-4">
+  {% for val, label, color, icon in [
+    (stats.total_users, 'Usuarios', 'primary', 'people'),
+    (stats.patients, 'Pacientes', 'info', 'person-heart'),
+    (stats.doctors, 'Médicos', 'success', 'hospital'),
+    (stats.appointments, 'Citas', 'warning', 'calendar3'),
+    (stats.today, 'Hoy', 'danger', 'sun'),
+  ] %}
+  <div class="col-6 col-md-2">
+    <div class="card border-0 shadow-sm text-center p-3">
+      <div class="fs-2 text-{{ color }} fw-bold">{{ val }}</div>
+      <div class="small text-muted">{{ label }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0"><h6 class="fw-bold mb-0">Usuarios</h6></div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+          <thead class="table-light"><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th></tr></thead>
+          <tbody>
+            {% for u in users[:10] %}
+            <tr>
+              <td>{{ u.name }}</td>
+              <td class="text-muted">{{ u.email }}</td>
+              <td><span class="badge bg-{% if u.role=='doctor' %}success{% elif u.role=='admin' %}danger{% else %}info{% endif %}">{{ u.role }}</span></td>
+              <td><span class="badge bg-{% if u.active %}success{% else %}secondary{% endif %}">{% if u.active %}Activo{% else %}Inactivo{% endif %}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0"><h6 class="fw-bold mb-0">Últimas citas</h6></div>
+      <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+          <thead class="table-light"><tr><th>Paciente</th><th>Médico</th><th>Fecha</th><th>Estado</th></tr></thead>
+          <tbody>
+            {% for a in appts %}
+            <tr>
+              <td>{{ a.patient.name }}</td>
+              <td>Dr. {{ a.doctor.name }}</td>
+              <td>{{ a.date.strftime('%d/%m/%Y') }}</td>
+              <td><span class="badge bg-{{ a.status_meta['color'] }}">{{ a.status_meta['label'] }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

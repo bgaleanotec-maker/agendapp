@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% block title %}Agendar Cita{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center gap-2 mb-4">
+  <a href="{{ url_for('patient_dashboard') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <div>
+    <h4 class="fw-bold mb-0">{% if reschedule_appt %}Reprogramar Cita{% else %}Nueva Cita{% endif %}</h4>
+    <p class="text-muted small mb-0">{% if reschedule_appt %}Elige nueva fecha y hora{% else %}Agenda con tu médico{% endif %}</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- AI Pre-screening -->
+  {% if not reschedule_appt %}
+  <div class="col-12">
+    <div class="card border-0 shadow-sm border-start border-4 border-primary">
+      <div class="card-body">
+        <h6 class="fw-bold mb-1"><i class="bi bi-robot text-primary me-2"></i>Motor IA — Pre-screening de síntomas</h6>
+        <p class="text-muted small mb-3">Describe tus síntomas y la IA te orientará antes de agendar.</p>
+
+        {% if ai_result %}
+        <div class="alert alert-{{ ai_result.color }} d-flex gap-3 align-items-start" role="alert">
+          <i class="bi bi-{% if ai_result.level == 'urgente' %}exclamation-triangle-fill{% elif ai_result.level == 'pronto' %}exclamation-circle-fill{% else %}check-circle-fill{% endif %} fs-4 mt-1"></i>
+          <div>
+            <div class="fw-bold">Nivel: {{ ai_result.priority|title }}</div>
+            <div>{{ ai_result.response }}</div>
+            {% if ai_result.specialty_hint %}
+            <div class="mt-1 small"><i class="bi bi-hospital me-1"></i>Especialidad sugerida: <strong>{{ ai_result.specialty_hint }}</strong></div>
+            {% endif %}
+            <div class="mt-1 small text-muted">{{ ai_result.slot_hint }}</div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="input-group">
+          <span class="input-group-text bg-primary text-white"><i class="bi bi-chat-text"></i></span>
+          <input type="text" id="symptomInput"
+                 class="form-control"
+                 placeholder="Ej: dolor de cabeza fuerte desde hace 2 días…"
+                 value="{{ prescreen_text }}"
+                 {% if ai_result %}value="{{ prescreen_text }}"{% endif %}/>
+          <button class="btn btn-primary" id="btnPrescreen" type="button">
+            <i class="bi bi-robot me-1"></i>Analizar
+          </button>
+        </div>
+        <div id="prescreenSpinner" class="mt-2 d-none text-center text-primary small">
+          <div class="spinner-border spinner-border-sm me-2"></div>Analizando síntomas…
+        </div>
+        <div id="aiResultBox" class="mt-2"></div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Booking form -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-calendar2-plus text-success me-2"></i>
+          {% if reschedule_appt %}Selecciona nueva fecha{% else %}Datos de la cita{% endif %}
+        </h6>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          <input type="hidden" name="action" value="book"/>
+          {% if reschedule_appt %}
+          <input type="hidden" name="doctor_id" value="{{ reschedule_appt.doctor_id }}"/>
+          <div class="alert alert-info small">
+            <i class="bi bi-info-circle me-2"></i>
+            Reprogramando cita con Dr. {{ reschedule_appt.doctor.name }}.
+            Anterior: {{ reschedule_appt.date.strftime('%d/%m/%Y') }} {{ reschedule_appt.time.strftime('%H:%M') }}
+          </div>
+          {% else %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Médico</label>
+            <select name="doctor_id" id="doctorSelect" class="form-select" required onchange="loadSlots()">
+              <option value="">-- Selecciona un médico --</option>
+              {% for doc in doctors %}
+              <option value="{{ doc.id }}">
+                Dr. {{ doc.name }} —
+                {{ doc.doctor_profile.specialty if doc.doctor_profile else 'Medicina General' }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha</label>
+            <input type="date" name="date" id="dateInput" class="form-control"
+                   min="{{ today }}" required onchange="loadSlots()"/>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Hora disponible</label>
+            <div id="slotsContainer">
+              <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Selecciona médico y fecha para ver horarios.</p>
+            </div>
+            <input type="hidden" name="time" id="selectedTime" required/>
+          </div>
+
+          {% if not reschedule_appt %}
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Motivo de consulta</label>
+            <textarea name="reason" class="form-control" rows="2"
+                      placeholder="Describe brevemente el motivo…" maxlength="200"></textarea>
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+            <i class="bi bi-calendar-check me-2"></i>
+            {% if reschedule_appt %}Confirmar Reprogramación{% else %}Agendar Cita{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini calendar -->
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="fw-bold mb-0"><i class="bi bi-calendar3 text-primary me-2"></i>Disponibilidad</h6>
+      </div>
+      <div class="card-body">
+        <div id="miniCal" style="min-height:300px"></div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm mt-3">
+      <div class="card-body small">
+        <h6 class="fw-semibold"><i class="bi bi-info-circle text-info me-2"></i>Políticas de citas</h6>
+        <ul class="mb-0 ps-3 text-muted">
+          <li>Cancelaciones con ≥24 h de antelación.</li>
+          <li>Confirmación por correo automática.</li>
+          <li>Recordatorio 24 h antes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('dateInput').min = today;
+document.getElementById('dateInput').value = today;
+
+{% if reschedule_appt %}
+const doctorId = {{ reschedule_appt.doctor_id }};
+{% endif %}
+
+// FullCalendar mini
+document.addEventListener('DOMContentLoaded', function () {
+  const cal = new FullCalendar.Calendar(document.getElementById('miniCal'), {
+    locale: 'es',
+    initialView: 'dayGridMonth',
+    headerToolbar: { left: 'prev,next', center: 'title', right: '' },
+    height: 320,
+    dateClick: function(info) {
+      document.getElementById('dateInput').value = info.dateStr;
+      loadSlots();
+    },
+  });
+  cal.render();
+});
+
+// Load available slots
+async function loadSlots() {
+  {% if reschedule_appt %}
+  const did = {{ reschedule_appt.doctor_id }};
+  {% else %}
+  const did = document.getElementById('doctorSelect').value;
+  {% endif %}
+  const dt  = document.getElementById('dateInput').value;
+  const container = document.getElementById('slotsContainer');
+  if (!did || !dt) return;
+
+  container.innerHTML = '<div class="text-center py-2"><div class="spinner-border spinner-border-sm text-primary"></div></div>';
+  const resp = await fetch(`/api/slots?doctor_id=${did}&date=${dt}`);
+  const data = await resp.json();
+  document.getElementById('selectedTime').value = '';
+
+  if (!data.slots || data.slots.length === 0) {
+    container.innerHTML = '<p class="text-warning small"><i class="bi bi-exclamation-circle me-1"></i>Sin disponibilidad para esta fecha.</p>';
+    return;
+  }
+  container.innerHTML = '<div class="d-flex flex-wrap gap-2">' +
+    data.slots.map(s =>
+      `<button type="button" class="btn btn-outline-primary btn-sm slot-btn" onclick="selectSlot('${s}')">${s}</button>`
+    ).join('') + '</div>';
+}
+
+function selectSlot(t) {
+  document.getElementById('selectedTime').value = t;
+  document.querySelectorAll('.slot-btn').forEach(b => {
+    b.classList.toggle('btn-primary', b.textContent === t);
+    b.classList.toggle('btn-outline-primary', b.textContent !== t);
+  });
+}
+
+// AI pre-screening (AJAX)
+document.getElementById('btnPrescreen')?.addEventListener('click', async function() {
+  const text = document.getElementById('symptomInput').value.trim();
+  if (!text) return;
+  document.getElementById('prescreenSpinner').classList.remove('d-none');
+  document.getElementById('aiResultBox').innerHTML = '';
+  try {
+    const resp = await fetch('/api/ai/prescreen', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+    const d = await resp.json();
+    const colorMap = {danger:'danger', warning:'warning', success:'success', info:'info'};
+    const color = colorMap[d.color] || 'info';
+    const iconMap = {urgente:'exclamation-triangle-fill', pronto:'exclamation-circle-fill', rutina:'check-circle-fill'};
+    const icon = iconMap[d.level] || 'info-circle-fill';
+    document.getElementById('aiResultBox').innerHTML = `
+      <div class="alert alert-${color} d-flex gap-3 align-items-start mt-2">
+        <i class="bi bi-${icon} fs-4 mt-1"></i>
+        <div>
+          <strong>Prioridad: ${d.priority}</strong> — ${d.response}
+          ${d.specialty_hint ? `<br><small><i class="bi bi-hospital me-1"></i>Especialidad sugerida: <strong>${d.specialty_hint}</strong></small>` : ''}
+          <br><small class="text-muted">${d.slot_hint}</small>
+        </div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('aiResultBox').innerHTML = '<div class="alert alert-warning small">Error al analizar síntomas.</div>';
+  }
+  document.getElementById('prescreenSpinner').classList.add('d-none');
+});
+
+// Auto-load if preselected
+{% if reschedule_appt %}
+window.addEventListener('load', loadSlots);
+{% endif %}
+</script>
+{% endblock %}

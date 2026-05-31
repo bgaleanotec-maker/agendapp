@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Mis Citas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Mis Citas</h4>
+    <p class="text-muted small">Historial completo de tus citas médicas</p>
+  </div>
+  <a href="{{ url_for('patient_book') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nueva Cita
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-body py-2">
+    <div class="d-flex gap-2 flex-wrap">
+      {% for s, label in [('all','Todas'),('pending','Pendientes'),('confirmed','Confirmadas'),('cancelled','Canceladas'),('completed','Completadas')] %}
+      <a href="{{ url_for('patient_appointments', status=s) }}"
+         class="btn btn-sm {% if status_filter == s %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% if appointments %}
+<div class="row g-3">
+  {% for a in appointments %}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100 {% if a.status == 'cancelled' %}opacity-75{% endif %}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="fw-bold fs-6">Dr. {{ a.doctor.name }}</div>
+          <span class="badge bg-{{ a.status_meta['color'] }} ms-2">
+            <i class="bi bi-{{ a.status_meta['icon'] }} me-1"></i>{{ a.status_meta['label'] }}
+          </span>
+        </div>
+        <div class="text-muted small">
+          {% if a.doctor.doctor_profile %}
+          <span class="me-3"><i class="bi bi-hospital me-1"></i>{{ a.doctor.doctor_profile.specialty }}</span>
+          {% endif %}
+        </div>
+        <div class="mt-2 d-flex gap-3 small">
+          <span><i class="bi bi-calendar2 text-primary me-1"></i>{{ a.date.strftime('%d/%m/%Y') }}</span>
+          <span><i class="bi bi-clock text-primary me-1"></i>{{ a.time.strftime('%H:%M') }}</span>
+          <span><i class="bi bi-hourglass-split text-primary me-1"></i>{{ a.duration }} min</span>
+        </div>
+        {% if a.reason %}
+        <div class="mt-2 small text-muted"><i class="bi bi-chat-left-text me-1"></i>{{ a.reason }}</div>
+        {% endif %}
+        {% if a.notes %}
+        <div class="mt-2 small p-2 bg-light rounded"><i class="bi bi-journal-text me-1"></i>{{ a.notes }}</div>
+        {% endif %}
+      </div>
+      {% if a.can_cancel %}
+      <div class="card-footer bg-white border-0 pb-3 d-flex gap-2">
+        <a href="{{ url_for('patient_reschedule', appt_id=a.id) }}"
+           class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-calendar-event me-1"></i>Reprogramar
+        </a>
+        <form method="POST" action="{{ url_for('patient_cancel', appt_id=a.id) }}"
+              onsubmit="return confirm('¿Cancelar esta cita?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="bi bi-x-circle me-1"></i>Cancelar
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+  <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+  <h5 class="text-muted">No hay citas para mostrar</h5>
+  <a href="{{ url_for('patient_book') }}" class="btn btn-primary mt-2">Agendar mi primera cita</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="row align-items-center py-5">
+  <div class="col-lg-6 mb-4 mb-lg-0">
+    <span class="badge bg-primary-subtle text-primary mb-3 px-3 py-2 fs-6">
+      <i class="bi bi-stars me-1"></i> Con Motor IA
+    </span>
+    <h1 class="display-4 fw-bold mb-3">
+      Tu salud, <span class="text-primary">tu agenda</span>,<br>tu control.
+    </h1>
+    <p class="lead text-muted mb-4">
+      AgendApp es el sistema de citas médicas para consultorios particulares.
+      Agenda, cancela y recibe recordatorios — desde cualquier dispositivo.
+    </p>
+    <div class="d-flex gap-3 flex-wrap">
+      <a href="{{ url_for('register') }}?role=patient" class="btn btn-primary btn-lg px-4 shadow">
+        <i class="bi bi-person-plus me-2"></i>Soy Paciente
+      </a>
+      <a href="{{ url_for('register') }}?role=doctor" class="btn btn-outline-primary btn-lg px-4">
+        <i class="bi bi-hospital me-2"></i>Soy Médico
+      </a>
+    </div>
+    <div class="mt-4 d-flex gap-4 text-muted small">
+      <span><i class="bi bi-check-circle-fill text-success me-1"></i>Gratis para empezar</span>
+      <span><i class="bi bi-shield-lock-fill text-success me-1"></i>Datos seguros HTTPS</span>
+      <span><i class="bi bi-phone-fill text-success me-1"></i>Responsive</span>
+    </div>
+  </div>
+  <div class="col-lg-6 d-flex justify-content-center">
+    <div class="card shadow-lg border-0 p-4 rounded-4" style="max-width:380px;width:100%">
+      <div class="text-center mb-3">
+        <div class="bg-primary-subtle rounded-circle d-inline-flex p-3 mb-2">
+          <i class="bi bi-calendar2-heart-fill fs-2 text-primary"></i>
+        </div>
+        <h5 class="fw-bold">Accede ahora</h5>
+        <p class="text-muted small">Demo: usa las credenciales de prueba</p>
+      </div>
+      <a href="{{ url_for('login') }}" class="btn btn-primary w-100 mb-2">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+      </a>
+      <a href="{{ url_for('register') }}" class="btn btn-outline-secondary w-100">
+        <i class="bi bi-person-plus me-2"></i>Crear Cuenta
+      </a>
+      <div class="mt-3 p-2 bg-light rounded small">
+        <p class="mb-1 fw-bold text-muted">🧪 Usuarios de prueba:</p>
+        <div class="d-flex justify-content-between"><span>Paciente:</span><code>paciente1@test.co / Test2026!</code></div>
+        <div class="d-flex justify-content-between"><span>Médico:</span><code>dr.garcia@agendapp.co / Doctor2026!</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<div class="row g-4 py-4">
+  <div class="col-12 text-center mb-2">
+    <h2 class="fw-bold">Todo lo que necesita un consultorio moderno</h2>
+    <p class="text-muted">Diseñado siguiendo los principios de usabilidad de Nielsen</p>
+  </div>
+  {% for feat in [
+    ("calendar2-check", "primary", "Agenda en tiempo real", "Ve la disponibilidad del doctor y reserva en segundos."),
+    ("robot", "success", "Motor IA", "Pre-screening de síntomas con inteligencia artificial antes de agendar."),
+    ("envelope-check", "warning", "Recordatorios email", "Notificaciones automáticas 24h antes de cada cita."),
+    ("bar-chart-line", "info", "Reportes médicos", "Estadísticas de citas, cancelaciones y pacientes frecuentes."),
+    ("phone-vibrate", "danger", "100% Responsive", "Funciona perfecto en celular, tablet y PC."),
+    ("shield-lock", "secondary", "Seguridad", "Contraseñas cifradas, HTTPS y control de acceso por roles."),
+  ] %}
+  <div class="col-md-4">
+    <div class="card h-100 border-0 shadow-sm rounded-3 p-3">
+      <div class="card-body">
+        <div class="bg-{{ feat[1] }}-subtle rounded-3 d-inline-flex p-2 mb-3">
+          <i class="bi bi-{{ feat[0] }} fs-4 text-{{ feat[1] }}"></i>
+        </div>
+        <h6 class="fw-bold">{{ feat[2] }}</h6>
+        <p class="text-muted small mb-0">{{ feat[3] }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Doctores -->
+{% if doctors %}
+<div class="py-4">
+  <h4 class="fw-bold mb-3">Nuestros médicos</h4>
+  <div class="row g-3">
+    {% for doc in doctors %}
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="bg-primary-subtle rounded-circle p-2">
+            <i class="bi bi-person-badge fs-4 text-primary"></i>
+          </div>
+          <div>
+            <div class="fw-bold">Dr. {{ doc.name }}</div>
+            <div class="text-muted small">
+              {{ doc.doctor_profile.specialty if doc.doctor_profile else 'Medicina General' }}
+            </div>
+          </div>
+          <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary ms-auto">Agendar</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

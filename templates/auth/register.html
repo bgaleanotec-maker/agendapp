@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Registrarse{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow border-0 rounded-4 mt-4">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <i class="bi bi-person-plus-fill fs-1 text-primary"></i>
+          <h4 class="fw-bold mt-2">Crear Cuenta</h4>
+          <p class="text-muted small">Únete a AgendApp</p>
+        </div>
+        <form method="POST" novalidate>
+          <!-- Rol -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Tipo de cuenta</label>
+            <div class="d-flex gap-3">
+              <div class="form-check flex-fill border rounded-3 p-3" id="rolePatientCard">
+                <input class="form-check-input" type="radio" name="role" value="patient"
+                       id="rolePatient" checked onchange="toggleSpecialty()"/>
+                <label class="form-check-label w-100" for="rolePatient">
+                  <i class="bi bi-person-heart text-primary me-1"></i><strong>Paciente</strong>
+                  <div class="text-muted small">Agenda tus citas médicas</div>
+                </label>
+              </div>
+              <div class="form-check flex-fill border rounded-3 p-3" id="roleDoctorCard">
+                <input class="form-check-input" type="radio" name="role" value="doctor"
+                       id="roleDoctor" onchange="toggleSpecialty()"/>
+                <label class="form-check-label w-100" for="roleDoctor">
+                  <i class="bi bi-hospital text-success me-1"></i><strong>Médico</strong>
+                  <div class="text-muted small">Gestiona tu consultorio</div>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nombre completo</label>
+            <input type="text" name="name" class="form-control"
+                   placeholder="Juan Pérez" value="{{ request.form.name or '' }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Correo electrónico</label>
+            <input type="email" name="email" class="form-control"
+                   placeholder="correo@ejemplo.com" value="{{ request.form.email or '' }}" required/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Teléfono <span class="text-muted small">(opcional)</span></label>
+            <input type="tel" name="phone" class="form-control"
+                   placeholder="+57 300 000 0000" value="{{ request.form.phone or '' }}"/>
+          </div>
+          <!-- Specialty (doctors only) -->
+          <div class="mb-3 d-none" id="specialtyField">
+            <label class="form-label fw-semibold">Especialidad</label>
+            <select name="specialty" class="form-select">
+              <option value="Medicina General">Medicina General</option>
+              <option value="Cardiología">Cardiología</option>
+              <option value="Pediatría">Pediatría</option>
+              <option value="Dermatología">Dermatología</option>
+              <option value="Traumatología">Traumatología</option>
+              <option value="Ginecología">Ginecología</option>
+              <option value="Neurología">Neurología</option>
+              <option value="Psiquiatría">Psiquiatría</option>
+              <option value="Oftalmología">Oftalmología</option>
+              <option value="Otorrinolaringología">Otorrinolaringología</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Contraseña</label>
+            <input type="password" name="password" class="form-control"
+                   placeholder="Mínimo 8 caracteres" required minlength="8"/>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Confirmar contraseña</label>
+            <input type="password" name="confirm" class="form-control"
+                   placeholder="Repite tu contraseña" required/>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+            <i class="bi bi-person-check me-2"></i>Crear Cuenta
+          </button>
+        </form>
+        <hr class="my-3"/>
+        <div class="text-center small">
+          ¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="text-primary fw-semibold">Iniciar sesión</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+const roleVal = "{{ request.form.get('role', 'patient') }}";
+if (roleVal === 'doctor') {
+  document.getElementById('roleDoctor').checked = true;
+  toggleSpecialty();
+}
+function toggleSpecialty() {
+  const isDoctor = document.getElementById('roleDoctor').checked;
+  document.getElementById('specialtyField').classList.toggle('d-none', !isDoctor);
+}
+</script>
+{% endblock %}
