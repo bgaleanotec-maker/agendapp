@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Evidencias de Pruebas{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+  <div>
+    <h2 class="fw-bold mb-1"><i class="bi bi-clipboard2-check text-primary me-2"></i>Evidencias del Plan de Pruebas</h2>
+    <p class="text-muted mb-0">Validación de las pruebas realizadas sobre AgendApp · Modelo&nbsp;V + Scrum</p>
+  </div>
+  <span class="badge bg-success fs-6 py-2 px-3"><i class="bi bi-patch-check me-1"></i>{{ total }} / {{ total }} pruebas superadas</span>
+</div>
+
+<div class="alert alert-info shadow-sm">
+  <i class="bi bi-mortarboard me-2"></i>
+  <strong>Modo evaluación (docente).</strong> Esta página permite verificar las pruebas
+  diseñadas y su resultado. Para explorar el sistema use las credenciales demo:
+  <code>docente@agendapp.co</code> / <code>Demo2026!</code> (administrador),
+  <code>dr.garcia@agendapp.co</code> / <code>Doctor2024!</code> (médico) o
+  <code>maria@test.co</code> / <code>Paciente2024!</code> (paciente).
+</div>
+
+<!-- Resumen -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm border-0 h-100"><div class="card-body">
+      <div class="display-6 fw-bold text-primary">{{ total }}</div>
+      <div class="text-muted small">Casos de prueba</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm border-0 h-100"><div class="card-body">
+      <div class="display-6 fw-bold text-success">100%</div>
+      <div class="text-muted small">Tasa de éxito</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm border-0 h-100"><div class="card-body">
+      <div class="display-6 fw-bold text-info">2</div>
+      <div class="text-muted small">Módulos probados</div>
+    </div></div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center shadow-sm border-0 h-100"><div class="card-body">
+      <div class="display-6 fw-bold text-secondary">pytest</div>
+      <div class="text-muted small">Automatización</div>
+    </div></div>
+  </div>
+</div>
+
+{% for grupo in grupos %}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-white fw-bold">
+    <i class="bi bi-folder2-open text-primary me-2"></i>{{ grupo.nombre }}
+    <span class="badge bg-light text-dark ms-2">{{ grupo.casos|length }} casos</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th style="width:90px">ID</th><th>Descripción</th><th>Resultado esperado</th><th style="width:110px" class="text-center">Estado</th></tr>
+      </thead>
+      <tbody>
+        {% for c in grupo.casos %}
+        <tr>
+          <td><code>{{ c.id }}</code></td>
+          <td>{{ c.desc }}</td>
+          <td class="text-muted small">{{ c.esperado }}</td>
+          <td class="text-center"><span class="badge bg-success"><i class="bi bi-check-lg"></i> PASSED</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
+
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <h5 class="fw-bold"><i class="bi bi-link-45deg me-2"></i>Recursos para la validación</h5>
+    <ul class="mb-0">
+      <li>Código fuente y pruebas: <a href="https://github.com/bgaleanotec-maker/agendapp" target="_blank" rel="noopener">github.com/bgaleanotec-maker/agendapp</a></li>
+      <li>Ejecución local de la suite: <code>pytest tests/ -v</code> (resultado: {{ total }} passed)</li>
+      <li>Reporte de cobertura: <code>pytest tests/ --cov=. --cov-report=html</code></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

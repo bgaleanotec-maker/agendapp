@@ -70,7 +70,8 @@
         </li>
       </ul>
       {% else %}
-      <ul class="navbar-nav ms-auto gap-2">
+      <ul class="navbar-nav ms-auto gap-2 align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('evidencias') }}"><i class="bi bi-clipboard2-check me-1"></i>Evidencias de pruebas</a></li>
         <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Ingresar</a></li>
         <li class="nav-item"><a class="btn btn-light btn-sm px-3" href="{{ url_for('register') }}">Registrarse</a></li>
       </ul>

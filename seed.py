@@ -27,6 +27,19 @@ def populate():
         admin.set_password("Admin2024!")
         db.session.add(admin)
 
+        # ── DOCENTE / EVALUADOR (cuenta demo para validación) ───────────────────
+        # Cuenta con rol administrador para que el docente pueda revisar la
+        # operación completa del sistema y validar las pruebas realizadas.
+        docente = User(
+            name="Docente Evaluador (Demo)",
+            email="docente@agendapp.co",
+            phone="+573000000001",
+            role="admin",
+            active=True,
+        )
+        docente.set_password("Demo2026!")
+        db.session.add(docente)
+
         # ── MÉDICOS ────────────────────────────────────────────────────────────
         doctors_data = [
             # (name, email, phone, specialty, bio, fee, days_of_week, start, end)

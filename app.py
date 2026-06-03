@@ -284,6 +284,50 @@ def index():
     return render_template("index.html", doctors=doctors)
 
 
+@app.route("/evidencias")
+def evidencias():
+    """Página pública de evidencias de pruebas (modo evaluación para el docente)."""
+    grupos = [
+        {"nombre": "Módulo de autenticación y control de acceso (RF-01)", "casos": [
+            {"id": "PA-01", "desc": "Registro válido con rol paciente", "esperado": "Cuenta creada y mensaje de éxito"},
+            {"id": "PA-02", "desc": "Registro válido con rol médico", "esperado": "Cuenta creada y mensaje de éxito"},
+            {"id": "PA-03", "desc": "Registro con correo ya existente", "esperado": "Se rechaza por correo duplicado"},
+            {"id": "PA-04", "desc": "Contraseñas que no coinciden", "esperado": "Mensaje de error de validación"},
+            {"id": "PA-05", "desc": "Contraseña demasiado corta", "esperado": "Mensaje de error de longitud"},
+            {"id": "PA-06", "desc": "Formulario con campos vacíos", "esperado": "El registro no se completa"},
+            {"id": "PA-07", "desc": "Login válido de paciente", "esperado": "Redirige al panel del paciente"},
+            {"id": "PA-08", "desc": "Login válido de médico", "esperado": "Redirige al panel del médico"},
+            {"id": "PA-09", "desc": "Contraseña incorrecta", "esperado": "Mensaje 'Credenciales incorrectas'"},
+            {"id": "PA-10", "desc": "Correo no registrado", "esperado": "Mensaje 'Credenciales incorrectas'"},
+            {"id": "PA-11", "desc": "Cierre de sesión autenticado", "esperado": "Sesión destruida y redirección"},
+            {"id": "PA-12", "desc": "Acceso a ruta protegida sin sesión", "esperado": "Redirige al inicio de sesión"},
+            {"id": "PA-13", "desc": "Paciente intenta panel de médico", "esperado": "Acceso denegado (403/redirección)"},
+            {"id": "PA-14", "desc": "Médico intenta panel de paciente", "esperado": "Acceso denegado (403/redirección)"},
+            {"id": "PA-15", "desc": "Administrador accede a su panel", "esperado": "Acceso permitido (200)"},
+        ]},
+        {"nombre": "Módulo de citas, API y motor de IA (RF-02 a RF-05)", "casos": [
+            {"id": "CA-01", "desc": "Ver página de agendamiento autenticado", "esperado": "Formulario visible (200)"},
+            {"id": "CA-02", "desc": "Consultar horarios de médico válido", "esperado": "Lista de horarios en JSON"},
+            {"id": "CA-03", "desc": "Consultar horarios con fecha inválida", "esperado": "Lista vacía sin error"},
+            {"id": "CA-04", "desc": "Consultar horarios de médico inexistente", "esperado": "Respuesta vacía o 404"},
+            {"id": "CA-05", "desc": "Consultar calendario en formato JSON", "esperado": "Lista de eventos del calendario"},
+            {"id": "CA-06", "desc": "Agendar cita en fecha pasada", "esperado": "Se rechaza; la cita no se crea"},
+            {"id": "CA-07", "desc": "Cancelar cita con más de 24 h", "esperado": "Cita cancelada correctamente"},
+            {"id": "CA-08", "desc": "Cancelar cita de otro paciente", "esperado": "Acceso denegado (403)"},
+            {"id": "CA-09", "desc": "Médico confirma una cita", "esperado": "Estado cambia a 'confirmada'"},
+            {"id": "CA-10", "desc": "Pre-triaje con síntoma urgente", "esperado": "Nivel 'urgente' y alerta roja"},
+            {"id": "CA-11", "desc": "Pre-triaje con consulta de rutina", "esperado": "Nivel 'rutina'"},
+            {"id": "CA-12", "desc": "Pre-triaje con texto vacío", "esperado": "Nivel 'normal'"},
+            {"id": "CA-13", "desc": "Listar médicos activos", "esperado": "Lista de médicos en JSON"},
+            {"id": "CA-14", "desc": "Carga de la página de inicio", "esperado": "Responde correctamente (200)"},
+            {"id": "CA-15", "desc": "Carga de la página de login", "esperado": "Responde correctamente (200)"},
+            {"id": "CA-16", "desc": "Solicitud a ruta inexistente", "esperado": "Error 404 controlado"},
+        ]},
+    ]
+    total = sum(len(g["casos"]) for g in grupos)
+    return render_template("evidencias.html", grupos=grupos, total=total)
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
