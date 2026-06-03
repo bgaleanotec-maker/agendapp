@@ -144,6 +144,37 @@ slides.append(slide(f"""
   </div>
 """, badge="Brayan"))
 
+# 7b. BRAYAN - pytest: alcance y conexion con la clase
+slides.append(slide(f"""
+  <h2>pytest: alcance y conexión con la clase</h2>
+  <div class="cols">
+    <div class="col">
+      <h3>¿Qué es y hasta dónde llega?</h3>
+      <ul class="check sm">
+        <li>Framework de pruebas de Python: ejecuta y reporta solo.</li>
+        <li><b>Alcance:</b> una misma suite cubre los niveles unitario, de integración y de sistema.</li>
+        <li>Fixtures (conftest.py): entorno aislado y reproducible con BD en memoria.</li>
+        <li>Cobertura con pytest-cov; se corre en cada cambio.</li>
+      </ul>
+      <pre class="code"><b>class</b> TestMotorIA:
+  <b>def</b> test_prescreen_urgente(self, client):
+    r = client.post("/api/ai/prescreen",
+        json={{"text": "dolor pecho ..."}})
+    <b>assert</b> r.get_json()["level"] == "urgente"</pre>
+    </div>
+    <div class="col">
+      <h3>Cómo conecta con lo visto en clase</h3>
+      <ul class="check sm">
+        <li><b>Modelo V:</b> un comando ejercita unitario → integración → sistema.</li>
+        <li><b>Automatización → regresión:</b> red de seguridad ante cada cambio.</li>
+        <li><b>Entorno controlado y reproducible</b>, condición de una prueba confiable (Singh, 2011).</li>
+        <li><b>Técnicas de diseño</b> (partición, valores límite, decisión) materializadas en cada caso.</li>
+        <li><b>Verificación y validación</b> llevadas a la práctica (SWEBOK).</li>
+      </ul>
+    </div>
+  </div>
+""", badge="Brayan"))
+
 # 8. BRAYAN - Evidencia pytest + evidencias page
 slides.append(slide(f"""
   <h2>Evidencia: pruebas que se ejecutan de verdad</h2>
@@ -243,6 +274,8 @@ table.vtable td{{border:1px solid #d4deec;padding:9px 12px;font-size:19px;backgr
 .cred{{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#fff;border:1px solid #dde6f2;border-radius:10px;padding:12px 16px;margin:10px 0;}}
 .cred span{{font-weight:700;color:var(--navy);font-size:18px;}}
 code{{font-family:Consolas,monospace;background:#0e1b33;color:#9fe7d4;padding:4px 10px;border-radius:6px;font-size:16px;}}
+pre.code{{background:#0e1b33;color:#d6e7ff;font-family:Consolas,monospace;font-size:15px;line-height:1.5;padding:16px 18px;border-radius:10px;white-space:pre;overflow:hidden;margin-top:14px;box-shadow:0 10px 24px rgba(20,40,80,.18);}}
+pre.code b{{color:#c792ea;font-weight:600;}}
 .closing{{font-size:54px;}}
 .progress{{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);color:#7e90b0;font-size:14px;z-index:10;}}
 .hint{{position:fixed;bottom:18px;right:24px;color:#5f7095;font-size:13px;z-index:10;}}

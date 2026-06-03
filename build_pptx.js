@@ -24,7 +24,7 @@ function badge(s, name) {
 }
 function footer(s, n) {
   s.addText(`AgendApp · Plan de Pruebas`, { x: 0.6, y: 7.05, w: 7, h: 0.3, fontSize: 9, color: MUTED });
-  s.addText(`${n} / 10`, { x: 11.8, y: 7.05, w: 1, h: 0.3, fontSize: 9, color: MUTED, align: "right" });
+  s.addText(`${n} / 11`, { x: 11.8, y: 7.05, w: 1, h: 0.3, fontSize: 9, color: MUTED, align: "right" });
 }
 function placeImage(s, file, rx, ry, rw, rh) {
   const r = RATIO[file]; let w = rw, h = rw * r;
@@ -158,6 +158,33 @@ s.addText([
 s.addText("CA-10 · test_prescreen_urgente · PASSED", { x: 0.6, y: 4.8, w: 6.0, h: 0.4, fontSize: 13, color: MUTED, fontFace: "Consolas" });
 placeImage(s, "05_pretriaje.png", 6.9, 1.55, 5.8, 5.1); footer(s, 7);
 
+// ── 7b. BRAYAN · pytest: alcance y conexión con la clase ───────────────────
+s = p.addSlide(); title(s, "pytest: alcance y conexión con la clase"); badge(s, "Brayan");
+s.addText("¿Qué es y hasta dónde llega?", { x: 0.6, y: 1.5, w: 6.0, h: 0.4, fontSize: 17, bold: true, color: BLUE });
+s.addText([
+  { text: "Framework de pruebas de Python: ejecuta y reporta solo.", options: { bullet: true, breakLine: true } },
+  { text: "Alcance: una misma suite cubre los niveles unitario, integración y sistema.", options: { bullet: true, breakLine: true } },
+  { text: "Fixtures (conftest.py): entorno aislado y reproducible con BD en memoria.", options: { bullet: true, breakLine: true } },
+  { text: "Cobertura con pytest-cov; se corre en cada cambio.", options: { bullet: true } },
+], { x: 0.6, y: 1.95, w: 6.0, h: 2.0, fontSize: 13.5, color: INK, paraSpaceAfter: 6 });
+s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: 0.6, y: 4.15, w: 6.0, h: 2.2, rectRadius: 0.08, fill: { color: "0E1B33" }, shadow: sh() });
+s.addText([
+  { text: "class ", options: { color: "C792EA", bold: true } }, { text: "TestMotorIA:", options: { color: "D6E7FF" }, breakLine: true },
+  { text: "  def ", options: { color: "C792EA", bold: true } }, { text: "test_prescreen_urgente(self, client):", options: { color: "D6E7FF" }, breakLine: true },
+  { text: "    r = client.post(\"/api/ai/prescreen\",", options: { color: "9FE7D4" }, breakLine: true },
+  { text: "        json={\"text\": \"dolor pecho ...\"})", options: { color: "9FE7D4" }, breakLine: true },
+  { text: "    assert ", options: { color: "C792EA", bold: true } }, { text: "r.get_json()[\"level\"] == \"urgente\"", options: { color: "D6E7FF" } },
+], { x: 0.6, y: 4.15, w: 6.0, h: 2.2, fontSize: 12, fontFace: "Consolas", valign: "middle", margin: 10 });
+s.addText("Cómo conecta con lo visto en clase", { x: 7.0, y: 1.5, w: 5.7, h: 0.4, fontSize: 17, bold: true, color: BLUE });
+s.addText([
+  { text: "Modelo V: un comando ejercita unitario → integración → sistema.", options: { bullet: true, breakLine: true } },
+  { text: "Automatización → regresión: red de seguridad ante cada cambio.", options: { bullet: true, breakLine: true } },
+  { text: "Entorno controlado y reproducible, condición de una prueba confiable (Singh, 2011).", options: { bullet: true, breakLine: true } },
+  { text: "Técnicas de diseño (partición, valores límite, decisión) en cada caso.", options: { bullet: true, breakLine: true } },
+  { text: "Verificación y validación llevadas a la práctica (SWEBOK).", options: { bullet: true } },
+], { x: 7.0, y: 1.95, w: 5.7, h: 4.4, fontSize: 14, color: INK, paraSpaceAfter: 10 });
+footer(s, 8);
+
 // ── 8. BRAYAN · Evidencia ─────────────────────────────────────────────────
 s = p.addSlide(); title(s, "Evidencia: pruebas que se ejecutan de verdad"); badge(s, "Brayan");
 s.addText([{ text: "31", options: { fontSize: 80, bold: true, color: TEAL } }, { text: " / 31", options: { fontSize: 36, color: MUTED } }],
@@ -168,7 +195,7 @@ s.addText([
   { text: "Página pública de evidencias dentro de la app", options: { bullet: true, breakLine: true } },
   { text: "github.com/bgaleanotec-maker/agendapp", options: { bullet: true } },
 ], { x: 0.6, y: 3.7, w: 6.0, h: 2.0, fontSize: 15, color: INK, paraSpaceAfter: 8 });
-placeImage(s, "02_evidencias.png", 7.0, 1.55, 5.7, 5.1); footer(s, 8);
+placeImage(s, "02_evidencias.png", 7.0, 1.55, 5.7, 5.1); footer(s, 9);
 
 // ── 9. BRAYAN/Todos · Demo docente ────────────────────────────────────────
 s = p.addSlide(); title(s, "Modo demo para validación del docente"); badge(s, "Brayan / Todos");
@@ -182,7 +209,7 @@ creds.forEach((c, i) => {
 });
 s.addShape(p.shapes.ROUNDED_RECTANGLE, { x: 0.6, y: 5.05, w: 6.2, h: 0.6, rectRadius: 0.08, fill: { color: PANEL } });
 s.addText("agendapp-rde9.onrender.com/evidencias", { x: 0.6, y: 5.05, w: 6.2, h: 0.6, fontSize: 14, bold: true, color: NAVY, align: "center", valign: "middle" });
-placeImage(s, "07_admin_dashboard.png", 7.0, 1.6, 5.7, 5.0); footer(s, 9);
+placeImage(s, "07_admin_dashboard.png", 7.0, 1.6, 5.7, 5.0); footer(s, 10);
 
 // ── 10. CIERRE ────────────────────────────────────────────────────────────
 s = p.addSlide(); s.background = { color: NAVY };
