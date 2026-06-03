@@ -908,6 +908,16 @@ def server_error(e):
 # Crea las tablas y carga datos demo si la BD está vacía. Es idempotente:
 # en redeploys no borra datos. Se activa solo bajo gunicorn en producción.
 # ─────────────────────────────────────────────────────────────────────────────
+def _ensure_docente():
+    """Garantiza la cuenta demo del docente (idempotente, aunque la BD no esté vacía)."""
+    if User.query.filter_by(email="docente@agendapp.co").first() is None:
+        d = User(name="Docente Evaluador (Demo)", email="docente@agendapp.co",
+                 phone="+573000000001", role="admin", active=True)
+        d.set_password("Demo2026!")
+        db.session.add(d)
+        db.session.commit()
+
+
 def _bootstrap_db():
     try:
         with app.app_context():
@@ -915,6 +925,7 @@ def _bootstrap_db():
             if User.query.first() is None:
                 from seed import populate
                 populate()
+            _ensure_docente()
     except Exception as exc:  # no tumbar el worker si otro ya sembró
         app.logger.warning(f"Bootstrap de BD omitido: {exc}")
 
